@@ -111,7 +111,8 @@ function drawCrosshair(ctx, canvasW, canvasH) {
   const b = getCardBounds(canvasW, canvasH);
   const cx = b.left + b.width  / 2;
   const cy = b.top  + b.height / 2;
-  const len = Math.min(canvasW, canvasH) * 0.06;
+  const lenX = canvasW * 0.10;  // 화면 너비의 10%
+  const lenY = canvasH * 0.10;  // 화면 높이의 10%
   const r = 8;
 
   ctx.save();
@@ -121,24 +122,24 @@ function drawCrosshair(ctx, canvasW, canvasH) {
 
   // 수평선
   ctx.beginPath();
-  ctx.moveTo(cx - len, cy);
+  ctx.moveTo(cx - lenX, cy);
   ctx.lineTo(cx - r - 2, cy);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.moveTo(cx + r + 2, cy);
-  ctx.lineTo(cx + len, cy);
+  ctx.lineTo(cx + lenX, cy);
   ctx.stroke();
 
   // 수직선
   ctx.beginPath();
-  ctx.moveTo(cx, cy - len);
+  ctx.moveTo(cx, cy - lenY);
   ctx.lineTo(cx, cy - r - 2);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.moveTo(cx, cy + r + 2);
-  ctx.lineTo(cx, cy + len);
+  ctx.lineTo(cx, cy + lenY);
   ctx.stroke();
 
   // 중앙 원

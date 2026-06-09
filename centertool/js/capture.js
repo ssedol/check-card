@@ -34,6 +34,9 @@ async function captureFrame() {
     sy = (vh - sh) / 2;
   }
 
+  // 다음 애니메이션 프레임까지 대기해 video 프레임이 디코딩된 후 복사
+  await new Promise(resolve => requestAnimationFrame(resolve));
+
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, offscreen.width, offscreen.height);
 
   // 2단계: 격자 오버레이 (FEAT-1)

@@ -401,6 +401,14 @@ html, body {
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* ── 가시성 토글 — JS에서 style.display 대신 클래스로 제어 ── */
+#desktop-screen.visible    { display: flex; }
+#permission-screen.visible { display: flex; }
+#app.visible               { display: block; }
+#action-modal.visible      { display: flex; }
+#ad-interstitial.visible   { display: flex; }
+#toast.visible             { display: block; }
+
 /* ── 접근성 — 포커스 링 전역 ── */
 :focus-visible {
   outline: 2px solid var(--grid-primary);

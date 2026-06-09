@@ -16,9 +16,7 @@ function isMobile() {
 async function init() {
   // PC 감지
   if (!isMobile()) {
-    document.getElementById('desktop-screen').style.display = 'flex';
-    document.getElementById('permission-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'none';
+    document.getElementById('desktop-screen').classList.add('visible');
     return;
   }
 
@@ -29,8 +27,7 @@ async function init() {
   const ok = await startCamera();
 
   if (!ok) {
-    document.getElementById('permission-screen').style.display = 'flex';
-    document.getElementById('app').style.display = 'none';
+    document.getElementById('permission-screen').classList.add('visible');
     return;
   }
 
@@ -39,9 +36,9 @@ async function init() {
 
 // ── 앱 화면 표시 ──
 function showApp() {
-  document.getElementById('permission-screen').style.display = 'none';
-  document.getElementById('desktop-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  document.getElementById('permission-screen').classList.remove('visible');
+  document.getElementById('desktop-screen').classList.remove('visible');
+  document.getElementById('app').classList.add('visible');
 
   setupCanvas();
   updateLevelButtons(currentSettings.grid_level);
@@ -114,12 +111,14 @@ function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
   toast.className = type;
-  toast.style.display = 'block';
+  toast.classList.add('visible');
 
   clearTimeout(toast._timer);
+  // DesignSystem §7: 성공 2초 / 에러 3초
+  const duration = type === 'error' ? 3000 : 2000;
   toast._timer = setTimeout(() => {
-    toast.style.display = 'none';
-  }, 2000);
+    toast.classList.remove('visible');
+  }, duration);
 }
 
 // ── 이벤트 리스너 ──
@@ -144,8 +143,7 @@ function setupEventListeners() {
       capturedBlob = await captureFrame();
       btn.classList.remove('loading');
       btn.disabled = false;
-      // 액션 모달 표시
-      document.getElementById('action-modal').style.display = 'flex';
+      document.getElementById('action-modal').classList.add('visible');
     } catch (err) {
       btn.classList.remove('loading');
       btn.disabled = false;
@@ -157,7 +155,7 @@ function setupEventListeners() {
   // 저장 버튼
   document.getElementById('save-btn').addEventListener('click', async () => {
     if (!capturedBlob) return;
-    document.getElementById('action-modal').style.display = 'none';
+    document.getElementById('action-modal').classList.remove('visible');
     const ok = await saveImage(capturedBlob);
     showToast(ok ? '저장됐어요 ✓' : '다시 시도해요', ok ? 'success' : 'error');
     capturedBlob = null;
@@ -166,7 +164,7 @@ function setupEventListeners() {
   // 공유 버튼
   document.getElementById('share-btn').addEventListener('click', async () => {
     if (!capturedBlob) return;
-    document.getElementById('action-modal').style.display = 'none';
+    document.getElementById('action-modal').classList.remove('visible');
     const ok = await shareImage(capturedBlob);
     if (ok) showToast('공유됐어요 ✓');
     capturedBlob = null;
@@ -174,14 +172,14 @@ function setupEventListeners() {
 
   // 취소 버튼
   document.getElementById('cancel-btn').addEventListener('click', () => {
-    document.getElementById('action-modal').style.display = 'none';
+    document.getElementById('action-modal').classList.remove('visible');
     capturedBlob = null;
   });
 
   // 모달 바깥 클릭 시 닫기
   document.getElementById('action-modal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('action-modal')) {
-      document.getElementById('action-modal').style.display = 'none';
+      document.getElementById('action-modal').classList.remove('visible');
       capturedBlob = null;
     }
   });
