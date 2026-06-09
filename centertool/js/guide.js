@@ -61,10 +61,8 @@ function getCardBounds(canvasW, canvasH) {
 function drawCornerGuides(ctx, canvasW, canvasH, color) {
   const b = getCardBounds(canvasW, canvasH);
   const s = GUIDE_CONFIG.cornerSize;
-  const c = color || '#FF6B00';
-
   ctx.save();
-  ctx.strokeStyle = c;
+  ctx.strokeStyle = '#FFFFFF';
   ctx.lineCap = 'square';
   ctx.globalAlpha = 1.0;
   ctx.setLineDash([]);
