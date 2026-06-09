@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/centertool/index.html" },
+    { "source": "/:path+", "destination": "/centertool/:path+" }
+  ]
+}
