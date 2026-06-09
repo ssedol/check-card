@@ -44,7 +44,6 @@ function showApp() {
   document.getElementById('app').classList.add('visible');
 
   setupCanvas();
-  updateLevelButtons(currentSettings.grid_level);
   startRenderLoop();
 
   if (!eventsBound) {
@@ -103,13 +102,6 @@ function startRenderLoop() {
   render();
 }
 
-// ── 레벨 버튼 UI 업데이트 ──
-function updateLevelButtons(activeLevel) {
-  document.querySelectorAll('.level-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.level === activeLevel);
-  });
-}
-
 // ── 토스트 표시 ──
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
@@ -127,15 +119,6 @@ function showToast(message, type = 'success') {
 
 // ── 이벤트 리스너 ──
 function setupEventListeners() {
-
-  // 레벨 버튼 클릭
-  document.querySelectorAll('.level-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentSettings.grid_level = btn.dataset.level;
-      saveSettings(currentSettings);
-      updateLevelButtons(btn.dataset.level);
-    });
-  });
 
   // 캡처 버튼
   document.getElementById('capture-btn').addEventListener('click', async () => {
