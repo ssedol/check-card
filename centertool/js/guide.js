@@ -61,16 +61,20 @@ function getCardBounds(canvasW, canvasH) {
 function drawCornerGuides(ctx, canvasW, canvasH, color) {
   const b = getCardBounds(canvasW, canvasH);
   const s = GUIDE_CONFIG.cornerSize;
-  const lw = GUIDE_CONFIG.lineWidth;
   const c = color || '#FF6B00';
 
   ctx.save();
   ctx.strokeStyle = c;
-  ctx.lineWidth = lw;
   ctx.lineCap = 'square';
   ctx.globalAlpha = 1.0;
+  ctx.setLineDash([]);
 
-  // ┌ 좌상단
+  // 카드 경계 사각형 (실물 도구의 외곽 테두리)
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(b.left, b.top, b.width, b.height);
+
+  // ┌ 좌상단 L자
+  ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(b.left, b.top + s);
   ctx.lineTo(b.left, b.top);
@@ -98,6 +102,8 @@ function drawCornerGuides(ctx, canvasW, canvasH, color) {
   ctx.lineTo(b.right, b.bottom - s);
   ctx.stroke();
 
+  ctx.lineWidth = 1.5;
+
   ctx.restore();
 }
 
@@ -108,41 +114,31 @@ function drawCornerGuides(ctx, canvasW, canvasH, color) {
  * @param {number} canvasH
  */
 function drawCrosshair(ctx, canvasW, canvasH) {
-  const b = getCardBounds(canvasW, canvasH);
+  const b  = getCardBounds(canvasW, canvasH);
   const cx = b.left + b.width  / 2;
   const cy = b.top  + b.height / 2;
-  const lenX = canvasW * 0.10;  // 화면 너비의 10%
-  const lenY = canvasH * 0.10;  // 화면 높이의 10%
-  const r = 8;
+  const r  = 8;
 
   ctx.save();
   ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.85;
+  ctx.lineWidth   = 1;
+  ctx.globalAlpha = 0.75;
+  ctx.setLineDash([]);
 
-  // 수평선
+  // 카드 전체 폭 수평선
   ctx.beginPath();
-  ctx.moveTo(cx - lenX, cy);
-  ctx.lineTo(cx - r - 2, cy);
+  ctx.moveTo(b.left,  cy);
+  ctx.lineTo(b.right, cy);
   ctx.stroke();
 
+  // 카드 전체 높이 수직선
   ctx.beginPath();
-  ctx.moveTo(cx + r + 2, cy);
-  ctx.lineTo(cx + lenX, cy);
-  ctx.stroke();
-
-  // 수직선
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - lenY);
-  ctx.lineTo(cx, cy - r - 2);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(cx, cy + r + 2);
-  ctx.lineTo(cx, cy + lenY);
+  ctx.moveTo(cx, b.top);
+  ctx.lineTo(cx, b.bottom);
   ctx.stroke();
 
   // 중앙 원
+  ctx.globalAlpha = 0.90;
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.stroke();
