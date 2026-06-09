@@ -20,17 +20,21 @@ async function init() {
     return;
   }
 
-  // 설정 불러오기
   currentSettings = loadSettings();
 
-  // 카메라 초기화 중 — 권한 안내 화면 먼저 표시 (검정 화면 방지)
+  // 이미 카메라 권한이 있으면 바로 시작 (Android Chrome 등)
+  try {
+    const perm = await navigator.permissions.query({ name: 'camera' });
+    if (perm.state === 'granted') {
+      const ok = await startCamera();
+      if (ok) { showApp(); return; }
+    }
+  } catch (_) {
+    // permissions API 미지원 (iOS Safari) — 아래 권한 화면으로 진행
+  }
+
+  // 권한 없음 또는 미확인 — 버튼 클릭 후 카메라 시작
   document.getElementById('permission-screen').classList.add('visible');
-
-  const ok = await startCamera();
-
-  if (!ok) return; // 권한 안내 화면 유지
-
-  showApp();
 }
 
 // ── 앱 화면 표시 ──
