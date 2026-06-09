@@ -4,21 +4,11 @@
 // ==========================================
 
 const GUIDE_CONFIG = {
-  cornerSize: 48,       // L자 변 길이 (px)
-  lineWidth: 3,         // L자 선 굵기
-  cardRatioW: 63,       // 포켓몬 카드 가로 (mm)
-  cardRatioH: 88,       // 포켓몬 카드 세로 (mm)
-  padding: 48,          // 카드 영역과 화면 가장자리 사이 여백
-  controlBarH: 56,      // 컨트롤 바 높이 (CSS와 동일하게)
-  adBannerH: 50,        // 광고 배너 높이 (CSS와 동일하게)
+  cardRatioW: 63,
+  cardRatioH: 88,
+  padding: 48,
 };
 
-/**
- * 카드 가이드 영역 좌표 계산
- * @param {number} canvasW - Canvas 너비
- * @param {number} canvasH - Canvas 높이
- * @returns {{left, top, right, bottom, width, height}}
- */
 function getCardBounds(canvasW, canvasH) {
   const { cardRatioW, cardRatioH, padding } = GUIDE_CONFIG;
   const ratio = cardRatioW / cardRatioH;
@@ -27,13 +17,10 @@ function getCardBounds(canvasW, canvasH) {
   const usableH = Math.max(canvasH - padding * 2, 1);
 
   let cardW, cardH;
-
   if (usableW / usableH < ratio) {
-    // 너비 기준으로 맞춤
     cardW = usableW;
     cardH = cardW / ratio;
   } else {
-    // 높이 기준으로 맞춤
     cardH = usableH;
     cardW = cardH * ratio;
   }
@@ -51,28 +38,27 @@ function getCardBounds(canvasW, canvasH) {
   };
 }
 
-/**
- * 4개 코너에 L자 가이드를 그린다 (FEAT-2)
- * @param {CanvasRenderingContext2D} ctx
- * @param {number} canvasW
- * @param {number} canvasH
- * @param {string} color
- */
+// PDF 기준: 코너 L자는 카드 가로 기준 약 10mm 길이
 function drawCornerGuides(ctx, canvasW, canvasH, color) {
-  const b = getCardBounds(canvasW, canvasH);
-  const s = GUIDE_CONFIG.cornerSize;
+  const b      = getCardBounds(canvasW, canvasH);
+  const pxPerMm = b.width / 63;
+  const s      = Math.round(10 * pxPerMm); // 10mm
+
   ctx.save();
   ctx.strokeStyle = '#FFFFFF';
-  ctx.lineCap = 'square';
-  ctx.globalAlpha = 1.0;
+  ctx.lineCap     = 'square';
   ctx.setLineDash([]);
 
-  // 카드 경계 사각형 (실물 도구의 외곽 테두리)
-  ctx.lineWidth = 1.5;
+  // 카드 경계 사각형
+  ctx.globalAlpha = 0.85;
+  ctx.lineWidth   = 1;
   ctx.strokeRect(b.left, b.top, b.width, b.height);
 
-  // ┌ 좌상단 L자
-  ctx.lineWidth = 3;
+  // L자 코너 (두꺼운 선)
+  ctx.globalAlpha = 1.0;
+  ctx.lineWidth   = 2.5;
+
+  // ┌ 좌상단
   ctx.beginPath();
   ctx.moveTo(b.left, b.top + s);
   ctx.lineTo(b.left, b.top);
@@ -100,42 +86,32 @@ function drawCornerGuides(ctx, canvasW, canvasH, color) {
   ctx.lineTo(b.right, b.bottom - s);
   ctx.stroke();
 
-  ctx.lineWidth = 1.5;
-
   ctx.restore();
 }
 
-/**
- * 중앙 십자선 + 원을 그린다 (FEAT-2)
- * @param {CanvasRenderingContext2D} ctx
- * @param {number} canvasW
- * @param {number} canvasH
- */
+// PDF 기준: 십자선은 카드 전체 폭/높이를 가로지르는 단일 선 + 원
 function drawCrosshair(ctx, canvasW, canvasH) {
   const b  = getCardBounds(canvasW, canvasH);
   const cx = b.left + b.width  / 2;
   const cy = b.top  + b.height / 2;
-  const r  = 8;
+  const r  = Math.max(6, b.width * 0.015); // 카드 폭의 1.5%
 
   ctx.save();
   ctx.strokeStyle = '#FFFFFF';
   ctx.lineWidth   = 1;
-  ctx.globalAlpha = 0.75;
+  ctx.globalAlpha = 0.85;
   ctx.setLineDash([]);
 
-  // 카드 전체 폭 수평선
   ctx.beginPath();
   ctx.moveTo(b.left,  cy);
   ctx.lineTo(b.right, cy);
   ctx.stroke();
 
-  // 카드 전체 높이 수직선
   ctx.beginPath();
   ctx.moveTo(cx, b.top);
   ctx.lineTo(cx, b.bottom);
   ctx.stroke();
 
-  // 중앙 원
   ctx.globalAlpha = 0.90;
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);

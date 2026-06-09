@@ -50,7 +50,7 @@ function drawGrid(ctx, level, canvasW, canvasH, color) {
   ctx.setLineDash([]);
   ctx.globalAlpha = 0.95;
   ctx.fillStyle   = '#FFFFFF';
-  ctx.font        = '8px "Courier New", monospace';
+  ctx.font        = `${Math.max(7, Math.round(pxPerMm * 1.5))}px "Courier New", monospace`;
 
   for (let i = 1; i <= MEASURE_COUNT; i++) {
     const d     = i * pxPerMm;
