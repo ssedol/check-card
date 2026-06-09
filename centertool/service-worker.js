@@ -1,4 +1,4 @@
-const CACHE_NAME = 'centertool-v4';
+const CACHE_NAME = 'centertool-v5';
 
 const CACHE_FILES = [
   '/centertool/',
@@ -7,6 +7,7 @@ const CACHE_FILES = [
   '/centertool/manifest.json',
   '/centertool/js/storage.js',
   '/centertool/js/corners.js',
+  '/centertool/js/level.js',
   '/centertool/js/grid.js',
   '/centertool/js/guide.js',
   '/centertool/js/camera.js',

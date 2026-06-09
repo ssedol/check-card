@@ -46,6 +46,9 @@ function showApp() {
   setupCanvas();
   startRenderLoop();
 
+  // Android는 권한 불필요 — 바로 센서 시작
+  initLevelSensor();
+
   if (!eventsBound) {
     setupEventListeners();
     eventsBound = true;
@@ -175,6 +178,8 @@ function startRenderLoop() {
       drawCornerOverlay(ctx, canvas.width, canvas.height);
     }
 
+    drawLevelIndicator(ctx, canvas.width, canvas.height);
+
     animationId = requestAnimationFrame(render);
   }
 
@@ -250,11 +255,12 @@ function setupEventListeners() {
     }
   });
 
-  // 코너 설정 버튼
-  document.getElementById('corner-btn').addEventListener('click', () => {
+  // 코너 설정 버튼 (iOS 수평 센서 권한도 함께 요청)
+  document.getElementById('corner-btn').addEventListener('click', async () => {
     if (isCornerSetupActive()) {
       cancelCornerSetup();
     } else {
+      await requestLevelPermission(); // iOS 13+: 사용자 제스처 안에서 요청
       startCornerSetup();
     }
     updateCornerUI();
