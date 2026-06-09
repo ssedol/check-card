@@ -23,8 +23,8 @@ function getCardBounds(canvasW, canvasH) {
   const { cardRatioW, cardRatioH, padding } = GUIDE_CONFIG;
   const ratio = cardRatioW / cardRatioH;
 
-  const usableW = canvasW - padding * 2;
-  const usableH = canvasH - padding * 2;
+  const usableW = Math.max(canvasW - padding * 2, 1);
+  const usableH = Math.max(canvasH - padding * 2, 1);
 
   let cardW, cardH;
 

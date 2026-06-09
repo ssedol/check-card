@@ -78,6 +78,7 @@ function startRenderLoop() {
 
   const canvas  = document.getElementById('overlay');
   const ctx     = canvas.getContext('2d');
+  if (!ctx) { console.error('[센터툴] Canvas context 획득 실패'); return; }
 
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);

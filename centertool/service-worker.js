@@ -1,18 +1,18 @@
-const CACHE_NAME = 'centertool-v2';
+const CACHE_NAME = 'centertool-v3';
 
 const CACHE_FILES = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/manifest.json',
-  '/js/storage.js',
-  '/js/grid.js',
-  '/js/guide.js',
-  '/js/camera.js',
-  '/js/capture.js',
-  '/js/app.js',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/centertool/',
+  '/centertool/index.html',
+  '/centertool/style.css',
+  '/centertool/manifest.json',
+  '/centertool/js/storage.js',
+  '/centertool/js/grid.js',
+  '/centertool/js/guide.js',
+  '/centertool/js/camera.js',
+  '/centertool/js/capture.js',
+  '/centertool/js/app.js',
+  '/centertool/icons/icon-192.png',
+  '/centertool/icons/icon-512.png'
 ];
 
 // 설치: 핵심 파일 캐싱

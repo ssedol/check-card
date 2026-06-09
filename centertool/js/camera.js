@@ -25,8 +25,13 @@ async function startCamera() {
     const video = document.getElementById('video');
     video.srcObject = videoStream;
 
-    // iOS Safari: play() 명시 호출 필요
-    await video.play();
+    // iOS Safari: play() 명시 호출 필요 (muted+playsinline이면 자동재생 허용)
+    try {
+      await video.play();
+    } catch (playErr) {
+      // autoplay 정책 위반 — stream은 살아있으므로 계속 진행
+      console.warn('[센터툴] play() 실패 (autoplay로 재시도됨):', playErr);
+    }
 
     return true;
   } catch (err) {
