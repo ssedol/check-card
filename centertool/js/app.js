@@ -110,23 +110,20 @@ function updateCornerUI() {
   const canvas         = document.getElementById('overlay');
 
   if (isCornerSetupActive()) {
-    cornerBtn.textContent      = '취소';
+    cornerBtn.textContent = '취소';
     cornerBtn.classList.add('active');
     cornerResetBtn.classList.remove('visible');
-    captureBtn.disabled        = true;
-    canvas.style.pointerEvents = 'auto'; // 터치 활성화
+    captureBtn.disabled   = true;
   } else if (hasCustomBounds()) {
-    cornerBtn.textContent      = '재설정';
+    cornerBtn.textContent = '재설정';
     cornerBtn.classList.remove('active');
     cornerResetBtn.classList.add('visible');
-    captureBtn.disabled        = false;
-    canvas.style.pointerEvents = 'none';
+    captureBtn.disabled   = false;
   } else {
-    cornerBtn.textContent      = '코너';
+    cornerBtn.textContent = '코너';
     cornerBtn.classList.remove('active');
     cornerResetBtn.classList.remove('visible');
-    captureBtn.disabled        = false;
-    canvas.style.pointerEvents = 'none';
+    captureBtn.disabled   = false;
   }
 }
 
@@ -273,21 +270,28 @@ function setupEventListeners() {
     showToast('자동 모드로 전환됐어요');
   });
 
-  // 코너 설정 중 캔버스 터치
-  const overlayCanvas = document.getElementById('overlay');
-  overlayCanvas.addEventListener('touchstart', (e) => {
+  // 코너 설정 중 터치 — document 레벨에서 잡아야 pointer-events 문제 없음
+  document.addEventListener('touchstart', (e) => {
     if (!isCornerSetupActive()) return;
+
+    // 컨트롤 바 / 광고 배너 영역 탭은 무시
+    if (e.target.closest('#control-bar') || e.target.closest('#ad-banner')) return;
+
     e.preventDefault();
 
-    const touch = e.touches[0];
-    const rect  = overlayCanvas.getBoundingClientRect();
-    const x     = touch.clientX - rect.left;
-    const y     = touch.clientY - rect.top;
+    const touch  = e.touches[0];
+    const canvas = document.getElementById('overlay');
+    const rect   = canvas.getBoundingClientRect();
+    const x      = touch.clientX - rect.left;
+    const y      = touch.clientY - rect.top;
 
     const done = addCorner(x, y);
     if (done) {
       updateCornerUI();
       showToast('카드 위치 설정 완료 ✓');
+    } else {
+      // 중간 탭 피드백 — 다음 모서리 안내
+      showToast(getCornerLabel() + ' 터치하세요', 'success');
     }
   }, { passive: false });
 
