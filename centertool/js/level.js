@@ -41,8 +41,8 @@ async function requestLevelPermission() {
 function drawLevelIndicator(ctx, canvasW, canvasH) {
   if (!_active) return;
 
-  const tiltX   = _gamma;       // 좌우 (±값이 클수록 기울어짐)
-  const tiltY   = _beta - 90;   // 앞뒤 (세로 기준 0이 수평)
+  const tiltX   = _gamma;  // 좌우 기울기
+  const tiltY   = _beta;   // 앞뒤 기울기 (바닥 향할 때 0이 수평)
   const maxTilt = 15;           // 이 각도 이상이면 버블이 끝까지 이동
 
   const cx     = canvasW - 40;
