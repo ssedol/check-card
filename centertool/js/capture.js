@@ -9,19 +9,32 @@
  */
 async function captureFrame() {
   const video = document.getElementById('video');
+  const overlayCanvas = document.getElementById('overlay');
   const settings = loadSettings();
 
-  // 오프스크린 Canvas 생성
+  // 오프스크린 Canvas — 화면에 표시되는 크기 기준으로 생성
   const offscreen = document.createElement('canvas');
-
-  // 실제 비디오 해상도 사용 (없으면 화면 크기)
-  offscreen.width  = video.videoWidth  || window.innerWidth;
-  offscreen.height = video.videoHeight || window.innerHeight;
+  offscreen.width  = overlayCanvas.width  || window.innerWidth;
+  offscreen.height = overlayCanvas.height || window.innerHeight;
 
   const ctx = offscreen.getContext('2d');
 
-  // 1단계: 비디오 현재 프레임 그리기
-  ctx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+  // 1단계: object-fit:cover와 동일한 크롭으로 비디오 현재 프레임 그리기
+  const vw = video.videoWidth  || offscreen.width;
+  const vh = video.videoHeight || offscreen.height;
+  const videoAspect  = vw / vh;
+  const canvasAspect = offscreen.width / offscreen.height;
+
+  let sx = 0, sy = 0, sw = vw, sh = vh;
+  if (videoAspect > canvasAspect) {
+    sw = vh * canvasAspect;
+    sx = (vw - sw) / 2;
+  } else if (videoAspect < canvasAspect) {
+    sh = vw / canvasAspect;
+    sy = (vh - sh) / 2;
+  }
+
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, offscreen.width, offscreen.height);
 
   // 2단계: 격자 오버레이 (FEAT-1)
   drawGrid(ctx, settings.grid_level, offscreen.width, offscreen.height, settings.grid_color);

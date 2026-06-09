@@ -70,28 +70,28 @@ function drawCornerGuides(ctx, canvasW, canvasH, color) {
   ctx.lineCap = 'square';
   ctx.globalAlpha = 1.0;
 
-  // ┘ 좌상단
+  // ┌ 좌상단
   ctx.beginPath();
   ctx.moveTo(b.left, b.top + s);
   ctx.lineTo(b.left, b.top);
   ctx.lineTo(b.left + s, b.top);
   ctx.stroke();
 
-  // └ 우상단
+  // ┐ 우상단
   ctx.beginPath();
   ctx.moveTo(b.right - s, b.top);
   ctx.lineTo(b.right, b.top);
   ctx.lineTo(b.right, b.top + s);
   ctx.stroke();
 
-  // ┐ 좌하단
+  // └ 좌하단
   ctx.beginPath();
   ctx.moveTo(b.left, b.bottom - s);
   ctx.lineTo(b.left, b.bottom);
   ctx.lineTo(b.left + s, b.bottom);
   ctx.stroke();
 
-  // ┌ 우하단
+  // ┘ 우하단
   ctx.beginPath();
   ctx.moveTo(b.right - s, b.bottom);
   ctx.lineTo(b.right, b.bottom);

@@ -65,13 +65,15 @@ function setupCanvas() {
 }
 
 function resizeCanvas(canvas) {
-  const video = document.getElementById('video');
+  const video      = document.getElementById('video');
+  const controlBar = document.getElementById('control-bar');
+  const adBanner   = document.getElementById('ad-banner');
+
   canvas.width  = video.offsetWidth  || window.innerWidth;
   canvas.height = video.offsetHeight ||
-    window.innerHeight - parseInt(getComputedStyle(document.documentElement)
-      .getPropertyValue('--control-bar-h')) -
-    parseInt(getComputedStyle(document.documentElement)
-      .getPropertyValue('--ad-banner-h'));
+    window.innerHeight -
+    (controlBar ? controlBar.offsetHeight : 56) -
+    (adBanner   ? adBanner.offsetHeight   : 50);
 }
 
 // ── 렌더링 루프 ──
