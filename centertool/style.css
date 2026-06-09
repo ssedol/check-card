@@ -218,6 +218,12 @@ html, body {
   outline-offset: 2px;
 }
 
+#corner-reset-btn.confirm {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(0, 255, 136, 0.10);
+}
+
 /* ── 캡처 버튼 ── */
 #capture-btn {
   width: 56px;

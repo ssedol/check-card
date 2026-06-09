@@ -55,49 +55,66 @@ function showApp() {
   }
 }
 
-// ── 코너 설정 오버레이 렌더링 ──
+// ── 코너 설정 오버레이 렌더링 (드래그 크롭 방식) ──
 function drawCornerOverlay(ctx, w, h) {
-  const step = getCornerStep();
-  const pts  = getCollectedPts();
+  const rect    = getWorkingRect();
+  const handles = getCornerHandles();
+  if (!rect) return;
 
   ctx.save();
 
-  // 수집된 코너 점 표시
-  pts.forEach(pt => {
-    ctx.beginPath();
-    ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
-    ctx.fillStyle   = '#FFFFFF';
-    ctx.globalAlpha = 0.95;
-    ctx.fill();
-    ctx.strokeStyle = '#FF6B00';
-    ctx.lineWidth   = 2;
-    ctx.stroke();
-  });
+  // 사각형 외부 어둡게 (evenodd 홀 기법)
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.beginPath();
+  ctx.rect(0, 0, w, h);
+  ctx.rect(rect.x, rect.y, rect.w, rect.h);
+  ctx.fill('evenodd');
 
-  // 수집된 점들 사이 점선 연결
-  if (pts.length >= 2) {
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.globalAlpha = 0.45;
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.stroke();
-    ctx.setLineDash([]);
+  // 사각형 테두리
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.lineWidth   = 2;
+  ctx.globalAlpha = 0.9;
+  ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
+
+  // 3등분 가이드선
+  ctx.globalAlpha = 0.25;
+  ctx.lineWidth   = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(rect.x + rect.w / 3, rect.y);
+  ctx.lineTo(rect.x + rect.w / 3, rect.y + rect.h);
+  ctx.moveTo(rect.x + rect.w * 2 / 3, rect.y);
+  ctx.lineTo(rect.x + rect.w * 2 / 3, rect.y + rect.h);
+  ctx.moveTo(rect.x, rect.y + rect.h / 3);
+  ctx.lineTo(rect.x + rect.w, rect.y + rect.h / 3);
+  ctx.moveTo(rect.x, rect.y + rect.h * 2 / 3);
+  ctx.lineTo(rect.x + rect.w, rect.y + rect.h * 2 / 3);
+  ctx.strokeStyle = '#FFFFFF';
+  ctx.stroke();
+
+  // 코너 핸들
+  if (handles) {
+    Object.values(handles).forEach(pt => {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
+      ctx.fillStyle   = '#FFFFFF';
+      ctx.globalAlpha = 0.95;
+      ctx.fill();
+      ctx.strokeStyle = '#FF6B00';
+      ctx.lineWidth   = 2.5;
+      ctx.globalAlpha = 1;
+      ctx.stroke();
+    });
   }
 
-  // 안내 텍스트 (그림자로 가독성 확보)
-  const label = getCornerLabel();
-  const text  = `${label} 터치  (${step}/4)`;
-  ctx.shadowColor   = 'rgba(0,0,0,0.9)';
-  ctx.shadowBlur    = 10;
-  ctx.fillStyle     = '#FFFFFF';
-  ctx.globalAlpha   = 1;
-  ctx.font          = 'bold 17px -apple-system, sans-serif';
-  ctx.textAlign     = 'center';
-  ctx.textBaseline  = 'middle';
-  ctx.fillText(text, w / 2, 44);
+  // 안내 텍스트
+  ctx.globalAlpha  = 1;
+  ctx.shadowColor  = 'rgba(0,0,0,0.9)';
+  ctx.shadowBlur   = 10;
+  ctx.fillStyle    = '#FFFFFF';
+  ctx.font         = 'bold 15px -apple-system, sans-serif';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('모서리 드래그로 카드에 맞추고 완료 누르세요', w / 2, 36);
 
   ctx.restore();
 }
@@ -107,23 +124,25 @@ function updateCornerUI() {
   const cornerBtn      = document.getElementById('corner-btn');
   const cornerResetBtn = document.getElementById('corner-reset-btn');
   const captureBtn     = document.getElementById('capture-btn');
-  const canvas         = document.getElementById('overlay');
 
   if (isCornerSetupActive()) {
-    cornerBtn.textContent = '취소';
+    cornerBtn.textContent      = '취소';
     cornerBtn.classList.add('active');
-    cornerResetBtn.classList.remove('visible');
-    captureBtn.disabled   = true;
+    cornerResetBtn.textContent = '완료';
+    cornerResetBtn.classList.add('visible', 'confirm');
+    captureBtn.disabled = true;
   } else if (hasCustomBounds()) {
-    cornerBtn.textContent = '재설정';
+    cornerBtn.textContent      = '재설정';
     cornerBtn.classList.remove('active');
+    cornerResetBtn.textContent = '초기화';
     cornerResetBtn.classList.add('visible');
-    captureBtn.disabled   = false;
+    cornerResetBtn.classList.remove('confirm');
+    captureBtn.disabled = false;
   } else {
     cornerBtn.textContent = '코너';
     cornerBtn.classList.remove('active');
-    cornerResetBtn.classList.remove('visible');
-    captureBtn.disabled   = false;
+    cornerResetBtn.classList.remove('visible', 'confirm');
+    captureBtn.disabled = false;
   }
 }
 
@@ -258,42 +277,52 @@ function setupEventListeners() {
       cancelCornerSetup();
     } else {
       await requestLevelPermission(); // iOS 13+: 사용자 제스처 안에서 요청
-      startCornerSetup();
+      const canvas = document.getElementById('overlay');
+      startCornerSetup(canvas.width, canvas.height);
     }
     updateCornerUI();
   });
 
-  // 코너 초기화 버튼
+  // 완료(설정 중) / 초기화(설정 후) 버튼
   document.getElementById('corner-reset-btn').addEventListener('click', () => {
-    resetCustomBounds();
-    updateCornerUI();
-    showToast('자동 모드로 전환됐어요');
+    if (isCornerSetupActive()) {
+      finalizeCornerSetup();
+      updateCornerUI();
+      showToast('카드 위치 설정 완료 ✓');
+    } else {
+      resetCustomBounds();
+      updateCornerUI();
+      showToast('자동 모드로 전환됐어요');
+    }
   });
 
-  // 코너 설정 중 터치 — document 레벨에서 잡아야 pointer-events 문제 없음
+  // 드래그 시작
   document.addEventListener('touchstart', (e) => {
     if (!isCornerSetupActive()) return;
-
-    // 컨트롤 바 / 광고 배너 영역 탭은 무시
     if (e.target.closest('#control-bar') || e.target.closest('#ad-banner')) return;
-
     e.preventDefault();
 
     const touch  = e.touches[0];
     const canvas = document.getElementById('overlay');
     const rect   = canvas.getBoundingClientRect();
-    const x      = touch.clientX - rect.left;
-    const y      = touch.clientY - rect.top;
-
-    const done = addCorner(x, y);
-    if (done) {
-      updateCornerUI();
-      showToast('카드 위치 설정 완료 ✓');
-    } else {
-      // 중간 탭 피드백 — 다음 모서리 안내
-      showToast(getCornerLabel() + ' 터치하세요', 'success');
-    }
+    startDrag(touch.clientX - rect.left, touch.clientY - rect.top);
   }, { passive: false });
+
+  // 드래그 중
+  document.addEventListener('touchmove', (e) => {
+    if (!isCornerSetupActive() || !isDragging()) return;
+    e.preventDefault();
+
+    const touch  = e.touches[0];
+    const canvas = document.getElementById('overlay');
+    const rect   = canvas.getBoundingClientRect();
+    moveDrag(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
+
+  // 드래그 종료
+  document.addEventListener('touchend', () => {
+    if (isCornerSetupActive()) endDrag();
+  });
 
   // 권한 허용 버튼 (권한 안내 화면)
   const permBtn = document.getElementById('request-permission-btn');
