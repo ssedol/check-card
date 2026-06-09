@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#FF6B00">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="센터툴">
+  <title>센터툴</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- PC 접속 안내 -->
+  <div id="desktop-screen">
+    <div class="desktop-icon">📱</div>
+    <p>스마트폰으로 접속해 주세요</p>
+    <small>센터툴은 모바일 전용입니다</small>
+  </div>
+
+  <!-- 카메라 권한 안내 -->
+  <div id="permission-screen">
+    <div class="permission-icon">📷</div>
+    <p>센터툴은 카메라 접근이 필요해요</p>
+    <button id="request-permission-btn" aria-label="카메라 권한 허용">허용하기</button>
+  </div>
+
+  <!-- 메인 앱 -->
+  <div id="app">
+    <!-- 카메라 스트림 -->
+    <video id="video" autoplay playsinline muted></video>
+
+    <!-- 격자 + 가이드 오버레이 -->
+    <canvas id="overlay"></canvas>
+
+    <!-- 컨트롤 바 -->
+    <div id="control-bar">
+      <div id="level-buttons">
+        <button class="level-btn" data-level="lv1" aria-label="격자 레벨 1 — 성긴 격자">L1</button>
+        <button class="level-btn active" data-level="lv2" aria-label="격자 레벨 2 — 중간 격자">L2</button>
+        <button class="level-btn" data-level="lv3" aria-label="격자 레벨 3 — 촘촘한 격자">L3</button>
+      </div>
+      <button id="capture-btn" aria-label="캡처하기">
+        <span class="capture-icon">⬤</span>
+      </button>
+    </div>
+
+    <!-- 광고 배너 영역 (예약 — M6에서 AdSense 코드 삽입) -->
+    <div id="ad-banner"></div>
+
+    <!-- 저장/공유 액션 모달 -->
+    <div id="action-modal">
+      <div id="action-sheet">
+        <button id="save-btn" aria-label="갤러리에 저장">
+          <span>↓</span> 저장
+        </button>
+        <button id="share-btn" aria-label="카카오톡으로 공유">
+          <span>↗</span> 공유
+        </button>
+        <button id="cancel-btn" aria-label="취소">✕</button>
+      </div>
+    </div>
+
+    <!-- 인터스티셜 광고 영역 (예약 — M6에서 AdSense 코드 삽입) -->
+    <div id="ad-interstitial">
+      <div id="ad-interstitial-content"></div>
+      <button id="ad-close-btn" aria-label="광고 닫기" disabled>닫기 (<span id="ad-countdown">3</span>)</button>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div id="toast" role="alert" aria-live="polite"></div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/grid.js"></script>
+  <script src="js/guide.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/capture.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Service Worker 등록 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('SW registered'))
+          .catch(err => console.log('SW failed:', err));
+      });
+    }
+  </script>
+
+</body>
+</html>

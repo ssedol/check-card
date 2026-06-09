@@ -1,0 +1,419 @@
+/* ==========================================
+   센터툴 Design System
+   배경: #000000 | 격자: #FF6B00 | 물리 CENTER TOOL 재현
+   ========================================== */
+
+/* ── Reset & Base ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg: #000000;
+  --surface: #1A1A1A;
+  --grid-primary: #FF6B00;
+  --grid-dim: rgba(255, 107, 0, 0.6);
+  --grid-ghost: rgba(255, 107, 0, 0.2);
+  --white: #FFFFFF;
+  --gray: #555555;
+  --success: #00FF88;
+  --error: #FF3B30;
+
+  --control-bar-h: 56px;
+  --ad-banner-h: 50px;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--white);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PC 안내 화면 ── */
+#desktop-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 12px;
+  color: var(--white);
+}
+
+#desktop-screen .desktop-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+#desktop-screen p {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+#desktop-screen small {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* ── 권한 안내 화면 ── */
+#permission-screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 16px;
+  padding: 32px;
+  text-align: center;
+}
+
+#permission-screen .permission-icon {
+  font-size: 64px;
+  margin-bottom: 8px;
+}
+
+#permission-screen p {
+  font-size: 16px;
+  color: var(--white);
+  line-height: 1.5;
+}
+
+#request-permission-btn {
+  margin-top: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--grid-primary);
+  border-radius: 4px;
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 48px;
+}
+
+#request-permission-btn:hover,
+#request-permission-btn:focus {
+  background: var(--grid-ghost);
+  outline: 2px solid var(--grid-primary);
+  outline-offset: 2px;
+}
+
+/* ── 메인 앱 ── */
+#app {
+  display: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── 카메라 비디오 ── */
+#video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--control-bar-h) - var(--ad-banner-h));
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* ── 격자/가이드 캔버스 오버레이 ── */
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - var(--control-bar-h) - var(--ad-banner-h));
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── 컨트롤 바 ── */
+#control-bar {
+  position: absolute;
+  bottom: var(--ad-banner-h);
+  left: 0;
+  right: 0;
+  height: var(--control-bar-h);
+  background: var(--surface);
+  border-top: 1px solid rgba(255, 107, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 10;
+}
+
+/* ── 레벨 버튼 그룹 ── */
+#level-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.level-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--gray);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.1s;
+  letter-spacing: 0.05em;
+}
+
+.level-btn.active {
+  background: rgba(255, 107, 0, 0.2);
+  border-color: var(--grid-primary);
+  color: var(--grid-primary);
+}
+
+.level-btn:focus {
+  outline: 2px solid var(--grid-primary);
+  outline-offset: 2px;
+}
+
+.level-btn:active {
+  background: rgba(255, 107, 0, 0.35);
+}
+
+/* ── 캡처 버튼 ── */
+#capture-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, background 0.1s;
+  flex-shrink: 0;
+}
+
+#capture-btn:focus {
+  outline: 2px solid var(--grid-primary);
+  outline-offset: 3px;
+}
+
+#capture-btn:active {
+  background: #CCCCCC;
+  transform: scale(0.93);
+}
+
+#capture-btn.loading {
+  background: #AAAAAA;
+  pointer-events: none;
+}
+
+.capture-icon {
+  font-style: normal;
+  font-size: 22px;
+  color: #000;
+  line-height: 1;
+}
+
+#capture-btn.loading .capture-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── 광고 배너 영역 ── */
+#ad-banner {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--ad-banner-h);
+  background: var(--surface);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* AdSense 코드는 M6에서 이 div 안에 삽입 */
+}
+
+/* ── 저장/공유 액션 모달 ── */
+#action-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 50;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: calc(var(--control-bar-h) + var(--ad-banner-h) + 16px);
+}
+
+#action-sheet {
+  background: var(--surface);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 12px;
+  width: calc(100% - 32px);
+  max-width: 360px;
+  padding: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#save-btn,
+#share-btn {
+  flex: 1;
+  height: 52px;
+  background: rgba(255, 107, 0, 0.15);
+  border: 1px solid var(--grid-primary);
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.1s;
+}
+
+#save-btn:hover,
+#share-btn:hover {
+  background: rgba(255, 107, 0, 0.3);
+}
+
+#save-btn:focus,
+#share-btn:focus {
+  outline: 2px solid var(--grid-primary);
+  outline-offset: 2px;
+}
+
+#cancel-btn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--gray);
+  border-radius: 50%;
+  color: var(--gray);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#cancel-btn:focus {
+  outline: 2px solid var(--gray);
+  outline-offset: 2px;
+}
+
+/* ── 인터스티셜 광고 영역 (예약) ── */
+#ad-interstitial {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 60;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+#ad-interstitial-content {
+  width: 320px;
+  height: 250px;
+  background: var(--surface);
+  border: 1px solid rgba(255,107,0,0.2);
+  border-radius: 8px;
+  /* AdSense 전면 광고 코드는 M6에서 삽입 */
+}
+
+#ad-close-btn {
+  padding: 12px 28px;
+  background: transparent;
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  color: var(--gray);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#ad-close-btn:not([disabled]) {
+  border-color: var(--white);
+  color: var(--white);
+  cursor: pointer;
+}
+
+#ad-close-btn:not([disabled]):hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* ── 토스트 알림 ── */
+#toast {
+  display: none;
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 100;
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease;
+}
+
+#toast.success {
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+#toast.error {
+  background: rgba(255, 59, 48, 0.15);
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── 접근성 — 포커스 링 전역 ── */
+:focus-visible {
+  outline: 2px solid var(--grid-primary);
+  outline-offset: 2px;
+}
+
+/* ── Safe Area (iOS 노치/홈 인디케이터) ── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  #ad-banner {
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(var(--ad-banner-h) + env(safe-area-inset-bottom));
+  }
+  :root {
+    --ad-banner-h: calc(50px + env(safe-area-inset-bottom));
+  }
+}
