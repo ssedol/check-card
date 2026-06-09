@@ -39,9 +39,15 @@
 
     <!-- 컨트롤 바 -->
     <div id="control-bar">
+      <div id="corner-area">
+        <button id="corner-btn" aria-label="카드 코너 설정">코너</button>
+      </div>
       <button id="capture-btn" aria-label="캡처하기">
         <span class="capture-icon">⬤</span>
       </button>
+      <div id="reset-area">
+        <button id="corner-reset-btn" aria-label="코너 초기화">초기화</button>
+      </div>
     </div>
 
     <!-- 광고 배너 영역 (예약 — M6에서 AdSense 코드 삽입) -->
@@ -71,6 +77,7 @@
   </div>
 
   <script src="js/storage.js"></script>
+  <script src="js/corners.js"></script>
   <script src="js/grid.js"></script>
   <script src="js/guide.js"></script>
   <script src="js/camera.js"></script>

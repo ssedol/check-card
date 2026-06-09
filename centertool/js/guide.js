@@ -10,6 +10,10 @@ const GUIDE_CONFIG = {
 };
 
 function getCardBounds(canvasW, canvasH) {
+  // 수동 지정 코너가 있으면 우선 사용
+  const custom = (typeof getCustomCardBounds === 'function') && getCustomCardBounds();
+  if (custom) return custom;
+
   const { cardRatioW, cardRatioH, padding } = GUIDE_CONFIG;
   const ratio = cardRatioW / cardRatioH;
 
