@@ -23,13 +23,12 @@ async function init() {
   // 설정 불러오기
   currentSettings = loadSettings();
 
-  // 카메라 시작
+  // 카메라 초기화 중 — 권한 안내 화면 먼저 표시 (검정 화면 방지)
+  document.getElementById('permission-screen').classList.add('visible');
+
   const ok = await startCamera();
 
-  if (!ok) {
-    document.getElementById('permission-screen').classList.add('visible');
-    return;
-  }
+  if (!ok) return; // 권한 안내 화면 유지
 
   showApp();
 }
