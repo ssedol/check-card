@@ -44,50 +44,57 @@ function getCardBounds(canvasW, canvasH) {
 
 // PDF 기준: 코너 L자는 카드 가로 기준 약 10mm 길이
 function drawCornerGuides(ctx, canvasW, canvasH, color) {
-  const b      = getCardBounds(canvasW, canvasH);
+  const b       = getCardBounds(canvasW, canvasH);
   const pxPerMm = b.width / 63;
-  const s      = Math.round(10 * pxPerMm); // 10mm
+  const s       = Math.round(10 * pxPerMm); // 10mm
+  const o       = 1; // 경계선 바깥 오프셋 (px)
 
   ctx.save();
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineCap     = 'square';
+  ctx.lineCap   = 'square';
   ctx.setLineDash([]);
 
-  // 카드 경계 사각형
+  // 카드 경계 사각형 (흰색)
+  ctx.strokeStyle = '#FFFFFF';
   ctx.globalAlpha = 0.85;
   ctx.lineWidth   = 1;
   ctx.strokeRect(b.left, b.top, b.width, b.height);
 
-  // L자 코너 (두꺼운 선)
+  // L자 코너 — 빨간색, 경계선보다 1px 바깥
+  ctx.strokeStyle = '#FF3B30';
   ctx.globalAlpha = 1.0;
   ctx.lineWidth   = 2.5;
 
+  const L = b.left   - o;
+  const T = b.top    - o;
+  const R = b.right  + o;
+  const B = b.bottom + o;
+
   // ┌ 좌상단
   ctx.beginPath();
-  ctx.moveTo(b.left, b.top + s);
-  ctx.lineTo(b.left, b.top);
-  ctx.lineTo(b.left + s, b.top);
+  ctx.moveTo(L, T + s);
+  ctx.lineTo(L, T);
+  ctx.lineTo(L + s, T);
   ctx.stroke();
 
   // ┐ 우상단
   ctx.beginPath();
-  ctx.moveTo(b.right - s, b.top);
-  ctx.lineTo(b.right, b.top);
-  ctx.lineTo(b.right, b.top + s);
+  ctx.moveTo(R - s, T);
+  ctx.lineTo(R, T);
+  ctx.lineTo(R, T + s);
   ctx.stroke();
 
   // └ 좌하단
   ctx.beginPath();
-  ctx.moveTo(b.left, b.bottom - s);
-  ctx.lineTo(b.left, b.bottom);
-  ctx.lineTo(b.left + s, b.bottom);
+  ctx.moveTo(L, B - s);
+  ctx.lineTo(L, B);
+  ctx.lineTo(L + s, B);
   ctx.stroke();
 
   // ┘ 우하단
   ctx.beginPath();
-  ctx.moveTo(b.right - s, b.bottom);
-  ctx.lineTo(b.right, b.bottom);
-  ctx.lineTo(b.right, b.bottom - s);
+  ctx.moveTo(R - s, B);
+  ctx.lineTo(R, B);
+  ctx.lineTo(R, B - s);
   ctx.stroke();
 
   ctx.restore();
