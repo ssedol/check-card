@@ -1,25 +1,25 @@
 // level.js — 수평 감지 (DeviceOrientation API)
 // 폰이 기울어진 채로 모서리를 찍으면 원근 왜곡이 생기므로 수평 확인 필요
 
-let _gamma  = 0;    // 좌우 기울기 (-90 ~ +90)
-let _beta   = 0;    // 앞뒤 기울기 (-180 ~ +180)
-let _active = false;
+let _gamma       = 0;    // 좌우 기울기 (-90 ~ +90)
+let _beta        = 0;    // 앞뒤 기울기 (-180 ~ +180)
+let _levelActive = false;  // corners.js의 _active와 충돌 방지
 
 function _onOrientation(e) {
-  _gamma  = e.gamma || 0;
-  _beta   = e.beta  || 0;
-  _active = true;
+  _gamma       = e.gamma || 0;
+  _beta        = e.beta  || 0;
+  _levelActive = true;
 }
 
 function initLevelSensor() {
   if (!('DeviceOrientationEvent' in window)) return;
   window.addEventListener('deviceorientation', _onOrientation);
-  _active = false;
+  _levelActive = false;
 }
 
 // 카메라가 바닥을 향할 때(beta≈0, gamma≈0) 수평 여부 반환
 function isPhoneLevel() {
-  if (!_active) return false;
+  if (!_levelActive) return false;
   return Math.abs(_gamma) < 2.5 && Math.abs(_beta) < 2.5;
 }
 
@@ -45,7 +45,7 @@ async function requestLevelPermission() {
 // 캔버스에 버블 레벨 표시기 그리기
 // 세로로 폰을 들고 카드를 바라볼 때: beta ≈ 90, gamma ≈ 0 이 수평 기준
 function drawLevelIndicator(ctx, canvasW, canvasH) {
-  if (!_active) return;
+  if (!_levelActive) return;
 
   const tiltX   = _gamma;  // 좌우 기울기
   const tiltY   = _beta;   // 앞뒤 기울기 (바닥 향할 때 0이 수평)

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'centertool-v11';
+const CACHE_NAME = 'centertool-v12';
 
 const CACHE_FILES = [
   '/centertool/',
