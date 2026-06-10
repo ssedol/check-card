@@ -89,15 +89,13 @@ function drawCornerOverlay(ctx, w, h) {
 
   // 변 핸들 (직사각형 바)
   if (sideHandles) {
+    ctx.fillStyle   = '#FFFFFF';
+    ctx.globalAlpha = 0.85;
     Object.entries(sideHandles).forEach(([side, pt]) => {
       const isV = (side === 'top' || side === 'bottom');
       const bw  = isV ? 36 : 6;
       const bh  = isV ? 6  : 36;
-      ctx.fillStyle   = '#FFFFFF';
-      ctx.globalAlpha = 0.85;
-      ctx.beginPath();
-      ctx.roundRect(pt.x - bw / 2, pt.y - bh / 2, bw, bh, 3);
-      ctx.fill();
+      ctx.fillRect(pt.x - bw / 2, pt.y - bh / 2, bw, bh);
     });
   }
 
@@ -197,7 +195,7 @@ function startRenderLoop() {
     drawGrid(ctx, currentSettings.grid_level, canvas.width, canvas.height, currentSettings.grid_color);
 
     if (currentSettings.crosshair_visible) {
-      drawCrosshair(ctx, canvas.width, canvas.height);
+      drawCrosshair(ctx, canvas.width, canvas.height, isPhoneLevel());
     }
 
     if (isCornerSetupActive()) {
@@ -230,7 +228,7 @@ function showToast(message, type = 'success') {
 // ── 이벤트 리스너 ──
 function setupEventListeners() {
 
-  // 캡처 버튼
+  // 캡처 버튼 — 즉시 저장 후 공유 선택
   document.getElementById('capture-btn').addEventListener('click', async () => {
     const btn = document.getElementById('capture-btn');
     btn.classList.add('loading');
@@ -240,6 +238,13 @@ function setupEventListeners() {
       capturedBlob = await captureFrame();
       btn.classList.remove('loading');
       btn.disabled = false;
+
+      // 즉시 갤러리에 저장
+      const saved = await downloadImage(capturedBlob);
+      if (saved) {
+        showToast('저장됐어요 ✓');
+      }
+      // 공유 선택 모달 표시
       document.getElementById('action-modal').classList.add('visible');
     } catch (err) {
       btn.classList.remove('loading');
@@ -247,15 +252,6 @@ function setupEventListeners() {
       showToast('다시 시도해요', 'error');
       console.error('[센터툴] 캡처 오류:', err);
     }
-  });
-
-  // 저장 버튼
-  document.getElementById('save-btn').addEventListener('click', async () => {
-    if (!capturedBlob) return;
-    document.getElementById('action-modal').classList.remove('visible');
-    const ok = await saveImage(capturedBlob);
-    showToast(ok ? '저장됐어요 ✓' : '다시 시도해요', ok ? 'success' : 'error');
-    capturedBlob = null;
   });
 
   // 공유 버튼

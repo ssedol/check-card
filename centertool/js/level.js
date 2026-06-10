@@ -17,6 +17,12 @@ function initLevelSensor() {
   _active = false;
 }
 
+// 카메라가 바닥을 향할 때(beta≈0, gamma≈0) 수평 여부 반환
+function isPhoneLevel() {
+  if (!_active) return false;
+  return Math.abs(_gamma) < 2.5 && Math.abs(_beta) < 2.5;
+}
+
 // iOS 13+는 permission 필요 — 반드시 사용자 제스처 안에서 호출
 async function requestLevelPermission() {
   if (
