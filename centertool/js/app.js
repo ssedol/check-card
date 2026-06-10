@@ -5,7 +5,6 @@
 let currentSettings = null;
 let animationId = null;
 let capturedBlob = null;
-let eventsBound = false;
 
 // ── 모바일 감지 ──
 function isMobile() {
@@ -22,21 +21,8 @@ async function init() {
 
   currentSettings = loadSettings();
 
-  // 권한 버튼은 카메라 확인 전에 먼저 바인딩 (권한 화면에서 동작해야 함)
-  const permBtn = document.getElementById('request-permission-btn');
-  if (permBtn) {
-    permBtn.addEventListener('click', async () => {
-      currentSettings = loadSettings();
-      const ok = await startCamera();
-      if (ok) {
-        showApp();
-      } else {
-        permBtn.textContent = '다시 시도';
-        permBtn.style.borderColor = 'var(--error)';
-        permBtn.style.color = 'var(--error)';
-      }
-    });
-  }
+  // 이벤트 바인딩은 렌더 루프와 완전히 분리해서 가장 먼저 수행
+  setupEventListeners();
 
   // 이미 카메라 권한이 있으면 바로 시작 (Android Chrome 등)
   try {
@@ -61,25 +47,19 @@ function showApp() {
 
   setupCanvas();
   startRenderLoop();
-
-  // Android는 권한 불필요 — 바로 센서 시작
   initLevelSensor();
-
-  if (!eventsBound) {
-    setupEventListeners();
-    eventsBound = true;
-  }
 }
 
 // ── 코너 설정 오버레이 렌더링 (드래그 크롭 방식) ──
 function drawCornerOverlay(ctx, w, h) {
-  const rect    = getWorkingRect();
-  const handles = getCornerHandles();
+  const rect         = getWorkingRect();
+  const cornerHandles = getCornerHandles();
+  const sideHandles   = getSideHandles();
   if (!rect) return;
 
   ctx.save();
 
-  // 사각형 외부 어둡게 (evenodd 홀 기법)
+  // 사각형 외부 어둡게
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.beginPath();
   ctx.rect(0, 0, w, h);
@@ -95,21 +75,33 @@ function drawCornerOverlay(ctx, w, h) {
   // 3등분 가이드선
   ctx.globalAlpha = 0.25;
   ctx.lineWidth   = 0.8;
+  ctx.strokeStyle = '#FFFFFF';
   ctx.beginPath();
-  ctx.moveTo(rect.x + rect.w / 3, rect.y);
-  ctx.lineTo(rect.x + rect.w / 3, rect.y + rect.h);
+  ctx.moveTo(rect.x + rect.w / 3,     rect.y);
+  ctx.lineTo(rect.x + rect.w / 3,     rect.y + rect.h);
   ctx.moveTo(rect.x + rect.w * 2 / 3, rect.y);
   ctx.lineTo(rect.x + rect.w * 2 / 3, rect.y + rect.h);
-  ctx.moveTo(rect.x, rect.y + rect.h / 3);
-  ctx.lineTo(rect.x + rect.w, rect.y + rect.h / 3);
-  ctx.moveTo(rect.x, rect.y + rect.h * 2 / 3);
-  ctx.lineTo(rect.x + rect.w, rect.y + rect.h * 2 / 3);
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.moveTo(rect.x,           rect.y + rect.h / 3);
+  ctx.lineTo(rect.x + rect.w,  rect.y + rect.h / 3);
+  ctx.moveTo(rect.x,           rect.y + rect.h * 2 / 3);
+  ctx.lineTo(rect.x + rect.w,  rect.y + rect.h * 2 / 3);
   ctx.stroke();
 
-  // 코너 핸들
-  if (handles) {
-    Object.values(handles).forEach(pt => {
+  // 변 핸들 (직사각형 바)
+  if (sideHandles) {
+    ctx.fillStyle   = '#FFFFFF';
+    ctx.globalAlpha = 0.85;
+    Object.entries(sideHandles).forEach(([side, pt]) => {
+      const isV = (side === 'top' || side === 'bottom');
+      const bw  = isV ? 36 : 6;
+      const bh  = isV ? 6  : 36;
+      ctx.fillRect(pt.x - bw / 2, pt.y - bh / 2, bw, bh);
+    });
+  }
+
+  // 모서리 핸들 (원형)
+  if (cornerHandles) {
+    Object.values(cornerHandles).forEach(pt => {
       ctx.beginPath();
       ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
       ctx.fillStyle   = '#FFFFFF';
@@ -130,7 +122,7 @@ function drawCornerOverlay(ctx, w, h) {
   ctx.font         = 'bold 15px -apple-system, sans-serif';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('모서리 드래그로 카드에 맞추고 완료 누르세요', w / 2, 36);
+  ctx.fillText('모서리·변 드래그로 카드에 맞추고 완료 누르세요', w / 2, 36);
 
   ctx.restore();
 }
@@ -203,7 +195,7 @@ function startRenderLoop() {
     drawGrid(ctx, currentSettings.grid_level, canvas.width, canvas.height, currentSettings.grid_color);
 
     if (currentSettings.crosshair_visible) {
-      drawCrosshair(ctx, canvas.width, canvas.height);
+      drawCrosshair(ctx, canvas.width, canvas.height, isPhoneLevel());
     }
 
     if (isCornerSetupActive()) {
@@ -236,7 +228,7 @@ function showToast(message, type = 'success') {
 // ── 이벤트 리스너 ──
 function setupEventListeners() {
 
-  // 캡처 버튼
+  // 캡처 버튼 — 즉시 저장 후 공유 선택
   document.getElementById('capture-btn').addEventListener('click', async () => {
     const btn = document.getElementById('capture-btn');
     btn.classList.add('loading');
@@ -246,6 +238,13 @@ function setupEventListeners() {
       capturedBlob = await captureFrame();
       btn.classList.remove('loading');
       btn.disabled = false;
+
+      // 즉시 갤러리에 저장
+      const saved = await downloadImage(capturedBlob);
+      if (saved) {
+        showToast('저장됐어요 ✓');
+      }
+      // 공유 선택 모달 표시
       document.getElementById('action-modal').classList.add('visible');
     } catch (err) {
       btn.classList.remove('loading');
@@ -253,15 +252,6 @@ function setupEventListeners() {
       showToast('다시 시도해요', 'error');
       console.error('[센터툴] 캡처 오류:', err);
     }
-  });
-
-  // 저장 버튼
-  document.getElementById('save-btn').addEventListener('click', async () => {
-    if (!capturedBlob) return;
-    document.getElementById('action-modal').classList.remove('visible');
-    const ok = await saveImage(capturedBlob);
-    showToast(ok ? '저장됐어요 ✓' : '다시 시도해요', ok ? 'success' : 'error');
-    capturedBlob = null;
   });
 
   // 공유 버튼
@@ -339,6 +329,22 @@ function setupEventListeners() {
   document.addEventListener('touchend', () => {
     if (isCornerSetupActive()) endDrag();
   });
+
+  // 권한 허용 버튼
+  const permBtn = document.getElementById('request-permission-btn');
+  if (permBtn) {
+    permBtn.addEventListener('click', async () => {
+      currentSettings = loadSettings();
+      const ok = await startCamera();
+      if (ok) {
+        showApp();
+      } else {
+        permBtn.textContent = '다시 시도';
+        permBtn.style.borderColor = 'var(--error)';
+        permBtn.style.color = 'var(--error)';
+      }
+    });
+  }
 }
 
 // ── 시작 ──

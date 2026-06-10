@@ -61,6 +61,30 @@ async function captureFrame() {
 }
 
 /**
+ * 즉시 다운로드 저장 (share sheet 없이 바로 저장)
+ * 촬영 버튼 누를 때 자동 호출됨
+ * @param {Blob} blob
+ * @returns {Promise<boolean>}
+ */
+async function downloadImage(blob) {
+  const filename = `centertool_${Date.now()}.png`;
+  try {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return true;
+  } catch (err) {
+    console.error('[센터툴] 저장 실패:', err);
+    return false;
+  }
+}
+
+/**
  * 이미지를 기기 갤러리에 저장한다
  * iOS: Web Share API 사용 / Android + fallback: <a download>
  * @param {Blob} blob

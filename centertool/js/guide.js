@@ -101,11 +101,12 @@ function drawCornerGuides(ctx, canvasW, canvasH, color) {
 }
 
 // PDF 기준: 십자선은 카드 전체 폭/높이를 가로지르는 단일 선 + 원
-function drawCrosshair(ctx, canvasW, canvasH) {
+// levelOk: true이면 중앙 점을 빨간색으로 표시
+function drawCrosshair(ctx, canvasW, canvasH, levelOk) {
   const b  = getCardBounds(canvasW, canvasH);
   const cx = b.left + b.width  / 2;
   const cy = b.top  + b.height / 2;
-  const r  = Math.max(6, b.width * 0.015); // 카드 폭의 1.5%
+  const r  = Math.max(6, b.width * 0.015);
 
   ctx.save();
   ctx.strokeStyle = '#FFFFFF';
@@ -123,10 +124,17 @@ function drawCrosshair(ctx, canvasW, canvasH) {
   ctx.lineTo(cx, b.bottom);
   ctx.stroke();
 
-  ctx.globalAlpha = 0.90;
+  // 중앙 점: 수평일 때 빨간 채움, 아닐 때 흰 외곽선
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.stroke();
+  if (levelOk) {
+    ctx.fillStyle   = '#FF3B30';
+    ctx.globalAlpha = 0.95;
+    ctx.fill();
+  } else {
+    ctx.globalAlpha = 0.90;
+    ctx.stroke();
+  }
 
   ctx.restore();
 }
