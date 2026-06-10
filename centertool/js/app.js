@@ -52,13 +52,14 @@ function showApp() {
 
 // ── 코너 설정 오버레이 렌더링 (드래그 크롭 방식) ──
 function drawCornerOverlay(ctx, w, h) {
-  const rect    = getWorkingRect();
-  const handles = getCornerHandles();
+  const rect         = getWorkingRect();
+  const cornerHandles = getCornerHandles();
+  const sideHandles   = getSideHandles();
   if (!rect) return;
 
   ctx.save();
 
-  // 사각형 외부 어둡게 (evenodd 홀 기법)
+  // 사각형 외부 어둡게
   ctx.fillStyle = 'rgba(0,0,0,0.55)';
   ctx.beginPath();
   ctx.rect(0, 0, w, h);
@@ -74,21 +75,35 @@ function drawCornerOverlay(ctx, w, h) {
   // 3등분 가이드선
   ctx.globalAlpha = 0.25;
   ctx.lineWidth   = 0.8;
+  ctx.strokeStyle = '#FFFFFF';
   ctx.beginPath();
-  ctx.moveTo(rect.x + rect.w / 3, rect.y);
-  ctx.lineTo(rect.x + rect.w / 3, rect.y + rect.h);
+  ctx.moveTo(rect.x + rect.w / 3,     rect.y);
+  ctx.lineTo(rect.x + rect.w / 3,     rect.y + rect.h);
   ctx.moveTo(rect.x + rect.w * 2 / 3, rect.y);
   ctx.lineTo(rect.x + rect.w * 2 / 3, rect.y + rect.h);
-  ctx.moveTo(rect.x, rect.y + rect.h / 3);
-  ctx.lineTo(rect.x + rect.w, rect.y + rect.h / 3);
-  ctx.moveTo(rect.x, rect.y + rect.h * 2 / 3);
-  ctx.lineTo(rect.x + rect.w, rect.y + rect.h * 2 / 3);
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.moveTo(rect.x,           rect.y + rect.h / 3);
+  ctx.lineTo(rect.x + rect.w,  rect.y + rect.h / 3);
+  ctx.moveTo(rect.x,           rect.y + rect.h * 2 / 3);
+  ctx.lineTo(rect.x + rect.w,  rect.y + rect.h * 2 / 3);
   ctx.stroke();
 
-  // 코너 핸들
-  if (handles) {
-    Object.values(handles).forEach(pt => {
+  // 변 핸들 (직사각형 바)
+  if (sideHandles) {
+    Object.entries(sideHandles).forEach(([side, pt]) => {
+      const isV = (side === 'top' || side === 'bottom');
+      const bw  = isV ? 36 : 6;
+      const bh  = isV ? 6  : 36;
+      ctx.fillStyle   = '#FFFFFF';
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.roundRect(pt.x - bw / 2, pt.y - bh / 2, bw, bh, 3);
+      ctx.fill();
+    });
+  }
+
+  // 모서리 핸들 (원형)
+  if (cornerHandles) {
+    Object.values(cornerHandles).forEach(pt => {
       ctx.beginPath();
       ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
       ctx.fillStyle   = '#FFFFFF';
@@ -109,7 +124,7 @@ function drawCornerOverlay(ctx, w, h) {
   ctx.font         = 'bold 15px -apple-system, sans-serif';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('모서리 드래그로 카드에 맞추고 완료 누르세요', w / 2, 36);
+  ctx.fillText('모서리·변 드래그로 카드에 맞추고 완료 누르세요', w / 2, 36);
 
   ctx.restore();
 }
