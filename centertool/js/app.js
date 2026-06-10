@@ -147,7 +147,7 @@ function updateCornerUI() {
     cornerResetBtn.classList.remove('confirm');
     captureBtn.disabled = false;
   } else {
-    cornerBtn.textContent = '코너';
+    cornerBtn.textContent = '격자크기';
     cornerBtn.classList.remove('active');
     cornerResetBtn.classList.remove('visible', 'confirm');
     captureBtn.disabled = false;
