@@ -60,9 +60,13 @@ function showApp() {
   document.getElementById('app').classList.add('visible');
 
   setupCanvas();
-  startRenderLoop();
 
-  // Android는 권한 불필요 — 바로 센서 시작
+  try {
+    startRenderLoop();
+  } catch (err) {
+    console.error('[센터툴] 렌더 루프 시작 실패:', err);
+  }
+
   initLevelSensor();
 
   if (!eventsBound) {
