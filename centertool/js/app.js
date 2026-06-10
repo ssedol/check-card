@@ -22,6 +22,22 @@ async function init() {
 
   currentSettings = loadSettings();
 
+  // 권한 버튼은 카메라 확인 전에 먼저 바인딩 (권한 화면에서 동작해야 함)
+  const permBtn = document.getElementById('request-permission-btn');
+  if (permBtn) {
+    permBtn.addEventListener('click', async () => {
+      currentSettings = loadSettings();
+      const ok = await startCamera();
+      if (ok) {
+        showApp();
+      } else {
+        permBtn.textContent = '다시 시도';
+        permBtn.style.borderColor = 'var(--error)';
+        permBtn.style.color = 'var(--error)';
+      }
+    });
+  }
+
   // 이미 카메라 권한이 있으면 바로 시작 (Android Chrome 등)
   try {
     const perm = await navigator.permissions.query({ name: 'camera' });
@@ -323,20 +339,6 @@ function setupEventListeners() {
   document.addEventListener('touchend', () => {
     if (isCornerSetupActive()) endDrag();
   });
-
-  // 권한 허용 버튼 (권한 안내 화면)
-  const permBtn = document.getElementById('request-permission-btn');
-  if (permBtn) {
-    permBtn.addEventListener('click', async () => {
-      currentSettings = loadSettings();
-      const ok = await startCamera();
-      if (ok) {
-        showApp();
-      } else {
-        showToast('카메라 접근이 필요해요', 'error');
-      }
-    });
-  }
 }
 
 // ── 시작 ──
