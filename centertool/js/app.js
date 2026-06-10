@@ -5,7 +5,6 @@
 let currentSettings = null;
 let animationId = null;
 let capturedBlob = null;
-let eventsBound = false;
 
 // ── 모바일 감지 ──
 function isMobile() {
@@ -22,21 +21,8 @@ async function init() {
 
   currentSettings = loadSettings();
 
-  // 권한 버튼은 카메라 확인 전에 먼저 바인딩 (권한 화면에서 동작해야 함)
-  const permBtn = document.getElementById('request-permission-btn');
-  if (permBtn) {
-    permBtn.addEventListener('click', async () => {
-      currentSettings = loadSettings();
-      const ok = await startCamera();
-      if (ok) {
-        showApp();
-      } else {
-        permBtn.textContent = '다시 시도';
-        permBtn.style.borderColor = 'var(--error)';
-        permBtn.style.color = 'var(--error)';
-      }
-    });
-  }
+  // 이벤트 바인딩은 렌더 루프와 완전히 분리해서 가장 먼저 수행
+  setupEventListeners();
 
   // 이미 카메라 권한이 있으면 바로 시작 (Android Chrome 등)
   try {
@@ -60,19 +46,8 @@ function showApp() {
   document.getElementById('app').classList.add('visible');
 
   setupCanvas();
-
-  try {
-    startRenderLoop();
-  } catch (err) {
-    console.error('[센터툴] 렌더 루프 시작 실패:', err);
-  }
-
+  startRenderLoop();
   initLevelSensor();
-
-  if (!eventsBound) {
-    setupEventListeners();
-    eventsBound = true;
-  }
 }
 
 // ── 코너 설정 오버레이 렌더링 (드래그 크롭 방식) ──
@@ -343,6 +318,22 @@ function setupEventListeners() {
   document.addEventListener('touchend', () => {
     if (isCornerSetupActive()) endDrag();
   });
+
+  // 권한 허용 버튼
+  const permBtn = document.getElementById('request-permission-btn');
+  if (permBtn) {
+    permBtn.addEventListener('click', async () => {
+      currentSettings = loadSettings();
+      const ok = await startCamera();
+      if (ok) {
+        showApp();
+      } else {
+        permBtn.textContent = '다시 시도';
+        permBtn.style.borderColor = 'var(--error)';
+        permBtn.style.color = 'var(--error)';
+      }
+    });
+  }
 }
 
 // ── 시작 ──
