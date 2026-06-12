@@ -228,6 +228,21 @@ function showToast(message, type = 'success') {
 // ── 이벤트 리스너 ──
 function setupEventListeners() {
 
+  // 정보 버튼
+  document.getElementById('info-btn').addEventListener('click', () => {
+    document.getElementById('guide-modal').classList.add('visible');
+  });
+
+  document.getElementById('guide-close-btn').addEventListener('click', () => {
+    document.getElementById('guide-modal').classList.remove('visible');
+  });
+
+  document.getElementById('guide-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('guide-modal')) {
+      document.getElementById('guide-modal').classList.remove('visible');
+    }
+  });
+
   // 캡처 버튼 — 즉시 저장 후 공유 선택
   document.getElementById('capture-btn').addEventListener('click', async () => {
     const btn = document.getElementById('capture-btn');

@@ -38,6 +38,49 @@
     <!-- 격자 + 가이드 오버레이 -->
     <canvas id="overlay"></canvas>
 
+    <!-- 정보 버튼 -->
+    <button id="info-btn" aria-label="이용 가이드">ⓘ</button>
+
+    <!-- 이용 가이드 모달 -->
+    <div id="guide-modal">
+      <div id="guide-sheet">
+        <div id="guide-header">
+          <span>이용 가이드</span>
+          <button id="guide-close-btn" aria-label="닫기">✕</button>
+        </div>
+        <div id="guide-body">
+          <div class="guide-step">
+            <span class="guide-num">1</span>
+            <div>
+              <strong>격자 크기 설정</strong>
+              <p>좌측 하단 <em>격자크기</em> 버튼을 누르면 빨간 사각형이 나타나요. 모서리나 변을 드래그해서 카드 테두리에 맞추고 <em>완료</em>를 누르세요.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="guide-num">2</span>
+            <div>
+              <strong>격자 읽기</strong>
+              <p>각 모서리에서 1–10 mm 눈금선이 그려져요. 마주 보는 숫자 쌍이 같으면 카드가 센터링된 것이에요.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="guide-num">3</span>
+            <div>
+              <strong>수평 확인</strong>
+              <p>화면 우측 상단 버블이 중앙에 오고 초록색이 되면 폰이 수평이에요. 기울어진 채로 찍으면 원근 왜곡이 생길 수 있어요.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="guide-num">4</span>
+            <div>
+              <strong>캡처 &amp; 저장</strong>
+              <p>중앙 흰 ⬤ 버튼으로 촬영하면 자동으로 갤러리에 저장되고, 공유 옵션도 선택할 수 있어요.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 컨트롤 바 -->
     <div id="control-bar">
       <div id="corner-area">
