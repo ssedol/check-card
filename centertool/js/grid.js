@@ -16,7 +16,7 @@ function drawGrid(ctx, level, canvasW, canvasH, color) {
     const d     = i * pxPerMm;
     const isOdd = (i % 2 !== 0);
 
-    ctx.strokeStyle = '#FFFFFF';
+    ctx.strokeStyle = '#FF3B30';
     ctx.lineWidth   = isOdd ? 1.2 : 0.8;
     ctx.globalAlpha = isOdd ? 0.90 : 0.60;
     ctx.setLineDash(isOdd ? [] : [4, 4]); // 홀수=실선, 짝수=점선
@@ -49,7 +49,7 @@ function drawGrid(ctx, level, canvasW, canvasH, color) {
   // ── 숫자 레이블 ──────────────────────────────
   ctx.setLineDash([]);
   ctx.globalAlpha = 0.95;
-  ctx.fillStyle   = '#FFFFFF';
+  ctx.fillStyle   = '#FF3B30';
   ctx.font        = `${Math.max(7, Math.round(pxPerMm * 1.5))}px "Courier New", monospace`;
 
   for (let i = 1; i <= MEASURE_COUNT; i++) {
